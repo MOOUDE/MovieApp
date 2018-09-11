@@ -42,9 +42,11 @@ public class MainActivity extends AppCompatActivity
     private Context mContext;
 
     public static String name;
-    private String base_url ="https://api.themoviedb.org/3/discover/movie?" ;
-    private String api_key = "HIDDEN";
+    private String base_url = "https://api.themoviedb.org/3/discover/movie?";
+    private String api_key = BuildConfig.ApiKey;
     private String url = base_url+api_key;
+    private String str_result;
+    private JsonHandler JSONobj;
 
 
 
@@ -64,33 +66,69 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.highest_rated:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    All_movies.sort(new Comparator<Movie>() {
-                        @Override
-                        public int compare(Movie movie, Movie t1) {
-                            return movie.compareTo(t1);
-                        }
-                    });
-                }
 
-                initRecyclerView(All_movies);
+             try {
+                 url = "https://api.themoviedb.org/3/movie/top_rated?" + api_key;
+
+                 str_result = new HttpFetchData().execute(url).get();
+
+                 Log.i("MainActivity", str_result);
+                 JSONobj = new JsonHandler(str_result);
+
+                 All_movies = JSONobj.move_data();
+
+
+                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                     All_movies.sort(new Comparator<Movie>() {
+                         @Override
+                         public int compare(Movie movie, Movie t1) {
+                             return movie.compareTo(t1);
+                         }
+                     });
+                 }
+
+
+                 initRecyclerView(All_movies);
+             }catch (Exception e){
+                 e.printStackTrace();
+             }
 
                 return true;
 
                 case R.id.popular_sort:
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        All_movies.sort(new Comparator<Movie>() {
-                            @Override
-                            public int compare(Movie movie, Movie t1) {
-                                return movie.compareToPopular(t1);
-                            }
-                        });
-                    }
+                    try {
 
-                    initRecyclerView(All_movies);
+
+                        url = "https://api.themoviedb.org/3/movie/top_rated?" + api_key;
+
+                        str_result = new HttpFetchData().execute(url).get();
+
+                        Log.i("MainActivity", str_result);
+                        JSONobj = new JsonHandler(str_result);
+
+                        All_movies = JSONobj.move_data();
+
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            All_movies.sort(new Comparator<Movie>() {
+                                @Override
+                                public int compare(Movie movie, Movie t1) {
+                                    return movie.compareToPopular(t1);
+                                }
+                            });
+                        }
+
+
+                        url = "https://api.themoviedb.org/3/movie/popular?" + api_key;
+
+                        initRecyclerView(All_movies);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                     return true;
          }
+
             return true;
     }
 
@@ -108,22 +146,20 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         //var initilaize
 
-
-
-
         no_internet = (TextView) findViewById(R.id.no_internet);
 
         if(isOnline()) {
             try {
 
-                String str_result = new HttpFetchData().execute("").get();
+                url = "https://api.themoviedb.org/3/discover/movie?" + api_key;
 
-                Log.i("MainActivity", str_result );
-                JsonHandler JSONobj = new JsonHandler(str_result);
+                str_result = new HttpFetchData().execute(url).get();
+
+                Log.i("MainActivity", str_result);
+                JSONobj = new JsonHandler(str_result);
 
                 All_movies = JSONobj.move_data();
                 initRecyclerView(All_movies);
-
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -138,6 +174,7 @@ public class MainActivity extends AppCompatActivity
 
 
     void initRecyclerView(ArrayList<Movie>moviesList ){
+
 
        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
@@ -161,9 +198,12 @@ public class MainActivity extends AppCompatActivity
     class HttpFetchData extends AsyncTask<String,String,String>{
         String jsonText;
 
+
+
         @Override
         protected String doInBackground(String... strings) {
-
+            url = strings[0];
+            Log.i("MainActivity", url );
             okHttp getData = new okHttp();
             try {
                 String data = getData.run(url);

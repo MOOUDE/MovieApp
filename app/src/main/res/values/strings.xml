@@ -2,7 +2,7 @@
     <string name="app_name">MovieApp</string>
     <string name="base_image_url">http://image.tmdb.org/t/p/w185/</string>
     <string name="base_url">https://api.themoviedb.org/3/discover/movie?</string>
-    <string name="api_key">api_key=19ba37415c4b93a3a83b80012d8fafe9</string>
+    <string name="api_key"></string>
     <string name="no_internet_msg">No Internet Connection \n X_X </string>
     <string name="overview">overview</string>
     <string name="title">title</string>

@@ -91,11 +91,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onClick(View view) {
                     int posetion = getAdapterPosition();
                     Intent intent = new Intent(itemView.getContext() , Movie_details.class);
-                    intent.putExtra("PosterImage" , movies.get(posetion).getPosterImg());
-                    intent.putExtra("Description" , movies.get(posetion).getDescrtptin() );
-                    intent.putExtra("Name",movies.get(posetion).getName());
-                    intent.putExtra("rate" , String.valueOf(movies.get(posetion).getVote_avg()));
-                    intent.putExtra("Released Date" , movies.get(posetion).getRelease_date());
+
+
+
+                    intent.putExtra("movie" , movies.get(posetion));
 
 
                     Log.i(TAG , "Position  IS :"+posetion);
