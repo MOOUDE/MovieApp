@@ -1,29 +1,43 @@
 package com.example.android.movieapp;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+@Entity(tableName = "Movies")
 public class Movie implements Comparable<Movie>, Parcelable {
     private String name;
     private String descrtptin;
-    private double rating, popularity;
+    @Ignore
+    private double rating;
+    private double popularity;
     private String posterImg;
     private String release_date;
     private double vote_avg;
 
+    @PrimaryKey(autoGenerate = false)
+    private long id;
 
-    public Movie(String name, String descrtptin,
-                 String posterImg, double vote_avg, String release_date, double popularity) {
+
+
+    public Movie(String name,
+                 String descrtptin,
+                 double popularity,
+                 String posterImg,
+                 String release_date,
+                 double vote_avg,
+                 long id) {
         this.name = name;
         this.descrtptin = descrtptin;
-        this.rating = rating;
-
-        this.posterImg = "http://image.tmdb.org/t/p/w185/" + posterImg;
+        this.posterImg = posterImg;
         this.vote_avg = vote_avg;
         this.release_date = release_date;
         this.popularity = popularity;
+        this.id = id;
     }
 
     public String getRelease_date() {
@@ -86,6 +100,9 @@ public class Movie implements Comparable<Movie>, Parcelable {
         this.posterImg = posterImg;
     }
 
+    public long getId() { return id; }
+
+    public void setId(long id) { this.id = id; }
 
     @Override
     public int compareTo(@NonNull Movie movie) {
@@ -133,6 +150,7 @@ public class Movie implements Comparable<Movie>, Parcelable {
         setPopularity(parsel.readDouble());
         setRating(parsel.readDouble());
         setVote_avg(parsel.readDouble());
+        setId(parsel.readLong());
     }
     @Override
     public void writeToParcel(Parcel parcel, int i) {
@@ -144,6 +162,8 @@ public class Movie implements Comparable<Movie>, Parcelable {
         parcel.writeDouble(getPopularity());
         parcel.writeDouble(getRating());
         parcel.writeDouble(getVote_avg());
+        parcel.writeLong(getId());
+
 
     }
 }

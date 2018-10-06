@@ -1,5 +1,7 @@
 package com.example.android.movieapp;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -7,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -32,6 +36,7 @@ import okhttp3.Response;
 
  interface AsyncResponse {
     void processFinish(String output);
+    void roomProcessFinish(List<Movie> movie);
 }
 
 public class MainActivity extends AppCompatActivity
@@ -40,7 +45,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NUM_COLUM =2;
     public String result;
     private OkHttpClient okHttpClient;
-    private ArrayList<Movie> All_movies;
+    private List<Movie> All_movies;
     public String JsonData;
     public static TextView no_internet;
     private Context mContext;
@@ -78,7 +83,6 @@ public class MainActivity extends AppCompatActivity
                  new HttpFetchData(this).execute(url);
 
 
-
              }catch (Exception e){
                  e.printStackTrace();
              }
@@ -95,10 +99,18 @@ public class MainActivity extends AppCompatActivity
                         e.printStackTrace();
                     }
                     return true;
+             case R.id.fav_movies:
+                try{
+                    new DatabaseFetchData(this).execute();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
          }
 
             return true;
+
     }
+
 
     public boolean isOnline() {
         ConnectivityManager cm =
@@ -134,12 +146,13 @@ public class MainActivity extends AppCompatActivity
 
 
 
-    void initRecyclerView(ArrayList<Movie>moviesList ){
+    void initRecyclerView(List<Movie>moviesList ){
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
         RecyclerViewAdapter adapter =
                 new RecyclerViewAdapter(this, moviesList , this );
+
 
         StaggeredGridLayoutManager layoutManager =
         new StaggeredGridLayoutManager(NUM_COLUM , LinearLayoutManager.VERTICAL);
@@ -161,7 +174,50 @@ public class MainActivity extends AppCompatActivity
         initRecyclerView(All_movies);
     }
 
+    @Override
+    public void roomProcessFinish(List<Movie> movie) {
+        All_movies = movie;
+        initRecyclerView(movie);
 
+    }
+
+
+    //*********** Fetching data from room ****************//
+    class DatabaseFetchData extends AsyncTask<Void, Void, Void> {
+
+        public LiveData<List<Movie>> movies;
+        private AppDatabase movieBD;
+        public AsyncResponse delegate = null;
+        public DatabaseFetchData(AsyncResponse delegate){
+            this.delegate = delegate;
+        }
+
+        @Override
+            protected Void doInBackground(Void... params) {
+             movieBD = AppDatabase.getInstance(getApplicationContext());
+             movies = movieBD.moviedao().loadAllTask();
+             movies.observe(MainActivity.this, new Observer<List<Movie>>() {
+                 @Override
+                 public void onChanged(@Nullable List<Movie> movies) {
+                  delegate.roomProcessFinish(movies);
+
+                 }
+             });
+
+                return null;
+            }
+        @Override
+        protected void onPostExecute(Void param) {
+
+           // delegate.roomProcessFinish((ArrayList<Movie>) );
+
+        }
+
+    }
+
+
+
+    //*********** Fetching data from online json ****************//
     class HttpFetchData extends AsyncTask<String,String,String>{
         String jsonText;
         public AsyncResponse delegate = null;

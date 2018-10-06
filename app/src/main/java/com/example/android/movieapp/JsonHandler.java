@@ -24,6 +24,7 @@ public class JsonHandler {
     private String release_date;
     private double vote_avg;
     private String movie_name;
+    private long movie_id;
 
 
 
@@ -41,16 +42,19 @@ public class JsonHandler {
                 movie_json =  moves_array.getJSONObject(i);
 
 
-                movie_poster = movie_json.getString("poster_path");
+                movie_poster = "http://image.tmdb.org/t/p/w185/"+movie_json.getString("poster_path");
                 movie_overview = movie_json.getString("overview");
                 movie_name = movie_json.getString("title");
                 popularity = movie_json.getDouble("popularity");
                 vote_avg = movie_json.getDouble("vote_average");
                 release_date = movie_json.getString("release_date");
 
+                movie_id = movie_json.getLong("id");
+                Log.d(".JsonHandler" , "id is "+movie_id);
 
-            movie_obj = new Movie(movie_name,movie_overview
-                    ,movie_poster,vote_avg , release_date , popularity);
+
+            movie_obj = new Movie(movie_name,movie_overview ,popularity ,
+                    movie_poster, release_date,vote_avg , movie_id);
                 movies_list.add(movie_obj);
             }
 

@@ -17,20 +17,32 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.viewHolder> {
 
     private static final String TAG = "RecyclerViewAdapter";
     private ArrayList<Movie> movies ;
+    private List<Movie> MvList;
     private String posterImg,movieName;
     private Context context;
     final private ItemClickListener itemClicked;
 
 
-    public RecyclerViewAdapter(Context context ,ArrayList<Movie> movies ,ItemClickListener item) {
-        this.movies = movies;
+    public RecyclerViewAdapter(Context context ,List<Movie> movies ,ItemClickListener item) {
+
+        this.MvList = movies;
         itemClicked = item;
         this.context = context;
+        this.movies = toArrayList(movies);
+
+
+
+    }
+    public ArrayList toArrayList(List listData) {
+        ArrayList arrayList = new ArrayList();
+        arrayList.addAll(listData);
+        return arrayList;
 
     }
 
@@ -90,9 +102,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 @Override
                 public void onClick(View view) {
                     int posetion = getAdapterPosition();
-                    Intent intent = new Intent(itemView.getContext() , Movie_details.class);
+                    Intent intent = new Intent(itemView.getContext() ,
+                            Movie_details.class);
 
 
+                    Log.d(TAG , "id in intent "+movies.get(posetion).getId());
 
                     intent.putExtra("movie" , movies.get(posetion));
 

@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimaryTerquaz">#009688</color>
+    <color name="colorPrimaryTerquazLight">#52c7b8</color>
+    <color name="colorPrimaryTerquazDark">#00675b</color>
+
 </resources>
