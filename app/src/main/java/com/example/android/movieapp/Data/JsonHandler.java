@@ -1,8 +1,9 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.Data;
 
 import android.content.res.Resources;
 import android.util.Log;
 import android.widget.TextView;
+import com.example.android.movieapp.modules.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,8 +27,6 @@ public class JsonHandler {
     private String movie_name;
     private long movie_id;
 
-
-
     public JsonHandler(String text){
         movies_list = new ArrayList<Movie>();
 
@@ -41,14 +40,12 @@ public class JsonHandler {
 
                 movie_json =  moves_array.getJSONObject(i);
 
-
                 movie_poster = "http://image.tmdb.org/t/p/w185/"+movie_json.getString("poster_path");
                 movie_overview = movie_json.getString("overview");
                 movie_name = movie_json.getString("title");
                 popularity = movie_json.getDouble("popularity");
                 vote_avg = movie_json.getDouble("vote_average");
                 release_date = movie_json.getString("release_date");
-
                 movie_id = movie_json.getLong("id");
                 Log.d(".JsonHandler" , "id is "+movie_id);
 
@@ -64,7 +61,7 @@ public class JsonHandler {
 
     }
 
-    ArrayList<Movie> move_data(){
+    public ArrayList<Movie> move_data(){
         return(movies_list);
     }
 

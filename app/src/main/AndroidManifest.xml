@@ -13,14 +13,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:fullBackupContent="@xml/backup_descriptor">
-        <activity android:name=".MainActivity">
+        <activity android:name=".UI.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Movie_details"></activity>
+        <activity android:name=".UI.Movie_details"></activity>
     </application>
 
 </manifest>

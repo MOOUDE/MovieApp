@@ -1,14 +1,10 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.UI;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
-import android.nfc.Tag;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,21 +16,21 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.example.android.movieapp.BuildConfig;
+import com.example.android.movieapp.Data.JsonHandler;
+import com.example.android.movieapp.modules.Movie;
+import com.example.android.movieapp.R;
+import com.example.android.movieapp.Adapters.RecyclerViewAdapter;
+import com.example.android.movieapp.Data.okHttp;
+import com.example.android.movieapp.Data.AppDatabase;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
- interface AsyncResponse {
+interface AsyncResponse {
     void processFinish(String output);
     void roomProcessFinish(List<Movie> movie);
 }
@@ -194,12 +190,13 @@ public class MainActivity extends AppCompatActivity
 
         @Override
             protected Void doInBackground(Void... params) {
-             movieBD = AppDatabase.getInstance(getApplicationContext());
+             movieBD = com.example.android.movieapp.Data.AppDatabase_Impl.getInstance(getApplicationContext());
              movies = movieBD.moviedao().loadAllTask();
              movies.observe(MainActivity.this, new Observer<List<Movie>>() {
                  @Override
                  public void onChanged(@Nullable List<Movie> movies) {
-                  delegate.roomProcessFinish(movies);
+                  initRecyclerView(movies);
+
 
                  }
              });
@@ -209,7 +206,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Void param) {
 
-           // delegate.roomProcessFinish((ArrayList<Movie>) );
+           // delegate.roomProcessFinish( movies );
 
         }
 

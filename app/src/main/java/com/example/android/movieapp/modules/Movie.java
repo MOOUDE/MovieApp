@@ -1,4 +1,4 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.modules;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;

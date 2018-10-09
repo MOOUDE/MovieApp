@@ -1,9 +1,7 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,12 +12,17 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.movieapp.R;
+import com.example.android.movieapp.modules.Movie;
+
+import com.example.android.movieapp.UI.Movie_details;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.viewHolder> {
+public class RecyclerViewAdapter extends
+        RecyclerView.Adapter<RecyclerViewAdapter.viewHolder> {
 
     private static final String TAG = "RecyclerViewAdapter";
     private ArrayList<Movie> movies ;
@@ -35,7 +38,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         itemClicked = item;
         this.context = context;
         this.movies = toArrayList(movies);
-
 
 
     }
