@@ -213,8 +213,9 @@ RecyclerView.LayoutManager layoutManager;
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
-        layoutManager.onRestoreInstanceState(state);
-
+        if(state !=null) {
+            layoutManager.onRestoreInstanceState(state);
+        }
 
 
     }
@@ -289,7 +290,7 @@ RecyclerView.LayoutManager layoutManager;
              movies.observe(MainActivity.this, new Observer<List<Movie>>() {
                  @Override
                  public void onChanged(@Nullable List<Movie> movies) {
-                  initRecyclerView(movies , recyclerView.getLayoutManager().onSaveInstanceState());
+                  initRecyclerView(movies , null);
 
 
                  }
