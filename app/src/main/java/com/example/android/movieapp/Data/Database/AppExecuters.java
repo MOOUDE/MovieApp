@@ -1,4 +1,4 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.Data.Database;
 
 import android.os.Handler;
 import android.os.Looper;

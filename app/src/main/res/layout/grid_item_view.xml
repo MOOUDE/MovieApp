@@ -19,6 +19,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:visibility="invisible"
+                android:scaleX="0.80"
+                android:scaleY="0.80"
+                android:textColor="@color/colorAccent"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                />
+
             <ImageView
                 android:id="@+id/movie_image"
                 android:layout_width="match_parent"

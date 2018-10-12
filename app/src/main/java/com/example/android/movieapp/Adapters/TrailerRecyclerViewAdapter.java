@@ -17,15 +17,22 @@ import java.util.List;
 
 
 
+
 public class TrailerRecyclerViewAdapter extends
         RecyclerView.Adapter<TrailerRecyclerViewAdapter.viewHolder>{
 
+    public interface onListItemClicked{
+
+        public void onItemClicked(int position);
+    }
     private Context context;
     private ArrayList<Trailer> trailers;
+    private final onListItemClicked mClickedItem;
 
 
-    public TrailerRecyclerViewAdapter(Context context , ArrayList<Trailer> trailers){
 
+    public TrailerRecyclerViewAdapter(Context context , ArrayList<Trailer> trailers,onListItemClicked mClickedItem){
+        this.mClickedItem = mClickedItem;
         this.context = context;
         this.trailers = trailers;
 
@@ -55,6 +62,7 @@ public class TrailerRecyclerViewAdapter extends
 
     }
 
+
     @Override
     public int getItemCount() {
         return trailers.size();
@@ -68,11 +76,14 @@ public class TrailerRecyclerViewAdapter extends
         public viewHolder(View itemView) {
             super(itemView);
             this.movie_url = (TextView) itemView.findViewById(R.id.trailer_url);
-
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+        int clikedPosition = getAdapterPosition();
+        mClickedItem.onItemClicked(clikedPosition);
+
 
         }
     }

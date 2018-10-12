@@ -1,4 +1,4 @@
-package com.example.android.movieapp.Data;
+package com.example.android.movieapp.Data.JsonHandlers;
 
 import android.content.res.Resources;
 import android.util.Log;
@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class JsonHandler {
+public class MoviesJsonHandler {
 
     private TextView test;
     private JSONObject jsonObj;
@@ -27,7 +27,7 @@ public class JsonHandler {
     private String movie_name;
     private long movie_id;
 
-    public JsonHandler(String text){
+    public MoviesJsonHandler(String text){
         movies_list = new ArrayList<Movie>();
 
         try {
@@ -47,7 +47,7 @@ public class JsonHandler {
                 vote_avg = movie_json.getDouble("vote_average");
                 release_date = movie_json.getString("release_date");
                 movie_id = movie_json.getLong("id");
-                Log.d(".JsonHandler" , "id is "+movie_id);
+                Log.d(".MoviesJsonHandler" , "id is "+movie_id);
 
 
             movie_obj = new Movie(movie_name,movie_overview ,popularity ,

@@ -1,4 +1,4 @@
-package com.example.android.movieapp.Data;
+package com.example.android.movieapp.Data.Database;
 
 import android.util.Log;
 

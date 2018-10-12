@@ -1,4 +1,4 @@
-package com.example.android.movieapp.Data;
+package com.example.android.movieapp.Data.Database;
 
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
@@ -16,9 +16,10 @@ public abstract class AppDatabase extends RoomDatabase {
     public static  AppDatabase getInstance(Context context) {
         if (sInsance == null) {
             synchronized (Lock) {
-                sInsance = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class
+                sInsance =
+                        Room.databaseBuilder(context.getApplicationContext(),
+                          AppDatabase.class
                         , AppDatabase.DAABAS_NAME)
-
                         .build();
             }
         }

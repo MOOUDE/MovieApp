@@ -1,4 +1,4 @@
-package com.example.android.movieapp.Data;
+package com.example.android.movieapp.Data.JsonHandlers;
 
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
@@ -20,21 +20,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-interface TrailerAsyncResponse {
-    void ProcessFinish(ArrayList<Trailer> movie);
-}
 
 public class TrailerJSONHanler{
 
     private Trailer trailer;
-    private final String TBASE_URL = "https://api.themoviedb.org/3/movie/";
-    private final String  apikey = BuildConfig.ApiKey;
     private String full_url;
     private long movie_id;
-    private final int TRAILER_CONSTANT = 22;
-    private final String URL_TEXT = "url_text";
     private ArrayList<Trailer> trailers;
-    Context context;
+    private Context context;
 
 
     public TrailerJSONHanler(long movie_id ,Context context){

@@ -1,4 +1,4 @@
-package com.example.android.movieapp.Data;
+package com.example.android.movieapp.Data.Database;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
@@ -17,7 +17,7 @@ public interface movieDao {
  @Query("SELECT *FROM Movies")
  LiveData<List<Movie>> loadAllTask();
 
- @Insert
+ @Insert (onConflict = OnConflictStrategy.REPLACE)
   void insertTask(Movie movie);
 
  @Delete

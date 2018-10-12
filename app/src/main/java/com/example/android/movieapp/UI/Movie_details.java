@@ -1,32 +1,37 @@
 package com.example.android.movieapp.UI;
-
-import android.app.LoaderManager;
+import android.net.Uri;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
-import android.os.AsyncTask;
+
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.android.movieapp.Adapters.ReviewsRecyclerViewAdpater;
 import com.example.android.movieapp.Adapters.TrailerRecyclerViewAdapter;
 import com.example.android.movieapp.BuildConfig;
+import com.example.android.movieapp.Data.Database.AppDatabase;
+import com.example.android.movieapp.Data.Database.okHttp;
+import com.example.android.movieapp.Data.JsonHandlers.TrailerJSONHanler;
 import com.example.android.movieapp.modules.Movie;
 
-import com.example.android.movieapp.AppExecuters;
-import com.example.android.movieapp.Data.*;
-import com.example.android.movieapp.Data.AppDatabase_Impl;
-import com.example.android.movieapp.Data.*;
-import com.example.android.movieapp.modules.Movie;
+import com.example.android.movieapp.Data.Database.AppExecuters;
 import com.example.android.movieapp.R;
+import com.example.android.movieapp.modules.Review;
 import com.example.android.movieapp.modules.Trailer;
 import com.squareup.picasso.Picasso;
 
@@ -34,47 +39,64 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-interface TrailerAsyncResponse {
+interface TrailerAsyncResponse  {
     void processFinish(ArrayList<Trailer> output);
 }
 
 public class Movie_details extends AppCompatActivity
-        implements  TrailerAsyncResponse {
+        implements LoaderManager.LoaderCallbacks<ArrayList<Trailer>>,
+        TrailerRecyclerViewAdapter.onListItemClicked
+    {
 
 private TextView description,name,rate,rDate;
 private ImageView posterImage;
 private Movie movie;
 private AppDatabase movieBD;
-private Button AddToFav;
-private Button DelFromFav;
+private ImageView AddToFav;
+private ImageView DelFromFav;
 private Intent intentActivity;
 private final int TRAILERS_CONSTANT = 22;
+private final int Reviews_CONSTANT = 40;
+private final String TRAILER_GET_KEY = "trailer_key";
+private final String REVIEW_GET_KEY = "review_key";
+private ProgressBar progressBar;
+private RecyclerView recyclerView,reviesRecyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
+        movieBD = AppDatabase.getInstance(Movie_details.this);
+
         setDetails();
 
-        AddToFav = (Button) findViewById(R.id.add_fav);
-        DelFromFav = (Button) findViewById(R.id.delete_fav);
-
+        AddToFav = (ImageView) findViewById(R.id.add_fav);
+        DelFromFav = (ImageView) findViewById(R.id.delete_fav);
+        recyclerView = (RecyclerView) findViewById(R.id.trailer_play);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         AddToFav.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                onAddToFavioroutClicked();
+                onAddToFavioroutClicked(Movie_details.this);
             }
         });
 
 
         DelFromFav.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                onDelFromFavioroutClicked();
+                onDelFromFavioroutClicked(Movie_details.this);
             }
         });
         callJSONdb();
 
+        reviesRecyclerView = (RecyclerView) findViewById(R.id.reviews_recycleView);
+        new ReviewsFetch(movie.getId() ,this,reviesRecyclerView , this);
+
+
 
     }
+
+
 
     @Override
     protected void onResume() {
@@ -85,12 +107,11 @@ private final int TRAILERS_CONSTANT = 22;
 
 
     void callDB() {
-        final Context context = getApplicationContext();
+        final Context context = Movie_details.this;
         AppExecuters.getInstance().getDiskIO().execute(new Runnable() {
             @Override
             public void run() {
                 boolean found;
-                movieBD = AppDatabase.getInstance(getApplicationContext());
                 Movie mv;
                 try {
                     mv = movieBD.moviedao().getById(movie.getId());
@@ -113,6 +134,7 @@ private final int TRAILERS_CONSTANT = 22;
                             AddToFav.setVisibility(View.VISIBLE);
                             DelFromFav.setVisibility(View.INVISIBLE);
                         }
+
                     }
 
                 });
@@ -122,17 +144,16 @@ private final int TRAILERS_CONSTANT = 22;
 
 
     /**********/
-    void  onDelFromFavioroutClicked(){
+    void  onDelFromFavioroutClicked(final Context context){
 
-        final Context context = getApplicationContext();
         AppExecuters.getInstance().getDiskIO().execute(new Runnable() {
             @Override
             public void run() {
                 boolean deleted;
                 try {
                     movieBD.moviedao().deleteTask(movie);
-                    finish();
                     deleted = true;
+
                 } catch (Exception e) {
                     deleted = false;
                 }
@@ -146,6 +167,7 @@ private final int TRAILERS_CONSTANT = 22;
                             AddToFav.setVisibility(View.VISIBLE);
                         } else {
                             Toast.makeText(context, "Not From Faviourt", Toast.LENGTH_SHORT).show();
+
                         }
                     }
 
@@ -155,9 +177,20 @@ private final int TRAILERS_CONSTANT = 22;
             }
         });
     }
-    void onAddToFavioroutClicked() {
 
-        final Context context = getApplicationContext();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(".Movie_details","finshed ");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        super.onSaveInstanceState(outState);
+    }
+
+    void onAddToFavioroutClicked(final Context context) {
 
         AppExecuters.getInstance().getDiskIO().execute(new Runnable() {
             @Override
@@ -165,9 +198,9 @@ private final int TRAILERS_CONSTANT = 22;
                 boolean added = false;
                 Movie mv;
                 try {
-                    movieBD.moviedao().insertTask(movie);
-                    finish();
+                   movieBD.moviedao().insertTask(movie);
                     added = true;
+
                 }catch (Exception e){
                     added = false;
                 }
@@ -176,9 +209,9 @@ private final int TRAILERS_CONSTANT = 22;
                     @Override
                     public void run() {
                         if (finalAdded) {
-                            Toast.makeText(context, "Added To the Faivourt", Toast.LENGTH_SHORT).show();
                             DelFromFav.setVisibility(View.VISIBLE);
                             AddToFav.setVisibility(View.INVISIBLE);
+                            Toast.makeText(context, "Added To the Faivourt", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(context, "Already in the Faivourt", Toast.LENGTH_SHORT).show();
                         }
@@ -186,6 +219,8 @@ private final int TRAILERS_CONSTANT = 22;
                 });
             }
         });
+
+
     }
     void setDetails(){
         description = (TextView) findViewById(R.id.Movie_desc);
@@ -198,7 +233,7 @@ private final int TRAILERS_CONSTANT = 22;
         description.setText(movie.getDescrtptin());
         name.setText(movie.getName());
         rate.setText(movie.getRelease_date());
-        rDate.setText(movie.getRelease_date());
+        rDate.setText(String.valueOf(movie.getVote_avg()));
 
 
         Picasso.get().load(movie.getPosterImg()).fit()
@@ -206,82 +241,146 @@ private final int TRAILERS_CONSTANT = 22;
                 .into(posterImage);
         callDB();
 
+
     }
 
     public void setRecyclerView(ArrayList<Trailer> trailers){
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.trailer_play);
+
         TrailerRecyclerViewAdapter trailerRecyclerViewAdapter =
-                new TrailerRecyclerViewAdapter(this , trailers);
+                new TrailerRecyclerViewAdapter(this , trailers , this);
 
         LinearLayoutManager linearLayoutManager =
                 new LinearLayoutManager(this ,LinearLayoutManager.VERTICAL,
                         false );
 
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(),
+                DividerItemDecoration.VERTICAL));
+
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(trailerRecyclerViewAdapter);
+        recyclerView.setNestedScrollingEnabled(false);
 
     }
 
 
-    @Override
-    public void processFinish(ArrayList<Trailer> output) {
-        Log.d(".Movie_details", "size is : "+output.size());
-        setRecyclerView(output);
 
-    }
 
     /////////////////////////////////////////////////////////////////////
 
     private void callJSONdb(){
         String  apikey = BuildConfig.ApiKey;
-        String trailerUrl="https://api.themoviedb.org/3/movie/"+movie.getId()+"/videos?"+
+        String trailerUrl=
+                "https://api.themoviedb.org/3/movie/"+movie.getId()+"/videos?"+
                 apikey;
 
-        new fetchData(this).execute(trailerUrl);
+        Bundle bundel = new Bundle();
+        bundel.putString(TRAILER_GET_KEY , trailerUrl.toString());
+
+
+        LoaderManager loaderManager = getSupportLoaderManager();
+
+        Loader<ArrayList<Trailer>> loader = loaderManager.getLoader(TRAILERS_CONSTANT);
+        if(loader == null){
+            loaderManager.initLoader(TRAILERS_CONSTANT , bundel , this).forceLoad();
+        }else{
+            loaderManager.restartLoader(TRAILERS_CONSTANT , bundel ,this).forceLoad();
+        }
+
+
+
     }
 
 
-    class fetchData extends AsyncTask<String ,String ,String> {
-
-        String jsonText;
-        String url,result;
-        TrailerJSONHanler jsonHanler;
-        ArrayList<Trailer> trailers;
-        public TrailerAsyncResponse delegate = null;
-        public fetchData(TrailerAsyncResponse delegate){
-            this.delegate = delegate;
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            url = strings[0];
-            okHttp getData = new okHttp();
-            try {
-                String data = getData.run(url);
-                result = data;
 
 
-                TrailerJSONHanler jsonHanler =
-                        new TrailerJSONHanler(movie.getId() , Movie_details.this);
-                trailers = jsonHanler.JsonProcess(result);
+    ArrayList<Trailer> trailers;
 
+    @Override
+    public Loader<ArrayList<Trailer>> onCreateLoader(int i, final Bundle bundle) {
+        return new AsyncTaskLoader<ArrayList<Trailer>>(this){
 
-            } catch (IOException e) {
-                e.printStackTrace();
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if(bundle == null ){
+                    return;
+                }
+
             }
 
 
-            return result;
+            @Override
+            public ArrayList<Trailer> loadInBackground() {
+                String trailersUrl = bundle.getString(TRAILER_GET_KEY);
+                if(trailersUrl == null || TextUtils.isEmpty(trailersUrl)){
+                    return null;
+                }
+                //
+
+                okHttp getData = new okHttp();
+                String result;
+                try {
+                    String data = getData.run(trailersUrl);
+                    result = data;
+
+
+                    TrailerJSONHanler jsonHanler =
+                            new TrailerJSONHanler(movie.getId() , Movie_details.this);
+                    trailers = jsonHanler.JsonProcess(result);
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    result = null;
+                }
+
+                //
+                Log.d(".Movie_details", "sizes is " + trailers.size());
+                return trailers;
+            }
+
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Trailer>> loader, ArrayList<Trailer> s) {
+        Log.d(".Movie_details", "sizes is " + s.size());
+
+        if (s != null && s.size() > 0) {
+            setRecyclerView(s);
+            Log.d(".Movie_details", "size is " + s.size());
+        }else{
+            Log.d(".Movie_details", "Null trailers");
+        }
+        recyclerView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
+
+
+    }
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Trailer>> loader) {
+
+    }
+
+    @Override
+    public void onItemClicked(int position) {
+
+        Intent appIntent =
+                new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("vnd.youtube:" + trailers.get(position).getKey()));
+        Intent webIntent =
+                new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + trailers.get(position).getKey()));
+        try {
+            startActivity(appIntent);
+        } catch (Exception ex) {
+            startActivity(webIntent);
         }
 
-        @Override
-        protected void onPostExecute(String s) {
-            delegate.processFinish(trailers);
-            Log.d(".Movie_details" , "size is "+trailers.size());
-        }
     }
+
 
 
 
